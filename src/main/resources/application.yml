@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: devops-exporter
+
+# Actuator 配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    prometheus:
+      access: unrestricted
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# 域名监控配置
+domain:
+  monitor:
+    enabled: true
+    # 检查间隔（秒）
+    check-interval: 3600
+    # 过期预警天数
+    warning-days: 30
+    # 监控的域名列表
+    domains:
+      - google.com
+      - github.com
+      - stackoverflow.com
+
+    # 连接超时（毫秒）
+    connection-timeout: 5000
+    # 读取超时（毫秒）
+    read-timeout: 10000
+
+# SSL 证书监控配置
+ssl:
+  monitor:
+    enabled: true
+    # 检查间隔（秒）
+    check-interval: 3600
+    # 过期预警天数
+    warning-days: 30
+    # 监控的域名列表 (SSL 证书)
+    domains:
+      - google.com
+      - github.com
+      - stackoverflow.com
+      - baidu.com
+    # 连接超时（毫秒）
+    connection-timeout: 5000
+    # 读取超时（毫秒）
+    read-timeout: 10000
+
+# 日志配置
+logging:
+  level:
+    io.github.devops.exporter: INFO
+    root: WARN

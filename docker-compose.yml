@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  devops-exporter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: devops-exporter:latest
+    container_name: devops-exporter
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # JVM 配置
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+      # 应用配置
+      - SPRING_PROFILES_ACTIVE=docker
+      # 日志配置
+      - LOGGING_LEVEL_ROOT=WARN
+      - LOGGING_LEVEL_IO_GITHUB_DEVOPS_EXPORTER=INFO
+    volumes:
+      # 配置文件挂载（可选）
+      - ./config/application-docker.yml:/app/config/application-docker.yml:ro
+      # 日志目录挂载
+      - ./logs:/app/logs
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.devops-exporter.rule=Host(`exporter.yourdomain.com`)"
+      - "traefik.http.services.devops-exporter.loadbalancer.server.port=8080"
+
+  # Prometheus (可选)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitoring
+    depends_on:
+      - devops-exporter
+
+  # Grafana (可选)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:

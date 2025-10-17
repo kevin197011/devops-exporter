@@ -1,0 +1,83 @@
+groups:
+  - name: domain_expiration_alerts
+    rules:
+      # 域名注册即将过期告警
+      - alert: DomainRegistrationExpiringSoon
+        expr: domain_expiration_days < 30 and domain_expiration_days >= 0
+        for: 5m
+        labels:
+          severity: warning
+          service: domain-monitor
+        annotations:
+          summary: "域名 {{ $labels.domain }} 注册即将过期"
+          description: "域名 {{ $labels.domain }} 的注册将在 {{ $value }} 天后过期，请及时续费"
+
+      # 域名注册已过期告警
+      - alert: DomainRegistrationExpired
+        expr: domain_expired == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: domain-monitor
+        annotations:
+          summary: "域名 {{ $labels.domain }} 注册已过期"
+          description: "域名 {{ $labels.domain }} 的注册已经过期，请立即处理"
+
+      # 域名查询失败告警
+      - alert: DomainQueryFailed
+        expr: domain_expiration_days == -999
+        for: 5m
+        labels:
+          severity: warning
+          service: domain-monitor
+        annotations:
+          summary: "域名 {{ $labels.domain }} WHOIS 查询失败"
+          description: "无法获取域名 {{ $labels.domain }} 的注册信息，请检查域名是否有效或 WHOIS 服务是否可用"
+
+  - name: ssl_certificate_alerts
+    rules:
+      # SSL 证书即将过期告警
+      - alert: SslCertificateExpiringSoon
+        expr: ssl_certificate_expiration_days < 30 and ssl_certificate_expiration_days >= 0
+        for: 5m
+        labels:
+          severity: warning
+          service: ssl-monitor
+        annotations:
+          summary: "SSL 证书 {{ $labels.domain }} 即将过期"
+          description: "域名 {{ $labels.domain }} 的 SSL 证书将在 {{ $value }} 天后过期，请及时更新"
+
+      # SSL 证书已过期告警
+      - alert: SslCertificateExpired
+        expr: ssl_certificate_expired == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: ssl-monitor
+        annotations:
+          summary: "SSL 证书 {{ $labels.domain }} 已过期"
+          description: "域名 {{ $labels.domain }} 的 SSL 证书已经过期，请立即更新"
+
+      # SSL 证书查询失败告警
+      - alert: SslCertificateQueryFailed
+        expr: ssl_certificate_expiration_days == -999
+        for: 5m
+        labels:
+          severity: warning
+          service: ssl-monitor
+        annotations:
+          summary: "SSL 证书 {{ $labels.domain }} 查询失败"
+          description: "无法获取域名 {{ $labels.domain }} 的 SSL 证书信息，请检查域名是否可访问"
+
+  - name: service_health_alerts
+    rules:
+      # 服务健康检查告警
+      - alert: DevopsExporterDown
+        expr: up{job="devops-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: devops-exporter
+        annotations:
+          summary: "DevOps Exporter 服务不可用"
+          description: "DevOps Exporter 服务已停止响应超过 1 分钟"

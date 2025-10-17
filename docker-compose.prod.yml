@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  devops-exporter:
+    image: devops-exporter:latest
+    container_name: devops-exporter-prod
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      # JVM 配置 - 生产环境
+      - JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+      # 应用配置
+      - SPRING_PROFILES_ACTIVE=prod
+      # 日志配置
+      - LOGGING_LEVEL_ROOT=WARN
+      - LOGGING_LEVEL_IO_GITHUB_DEVOPS_EXPORTER=INFO
+      # 监控配置
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=when_authorized
+    volumes:
+      # 生产配置文件
+      - ./config/application-prod.yml:/app/config/application-prod.yml:ro
+      # 日志目录
+      - /var/log/devops-exporter:/app/logs
+      # 时区
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+networks:
+  monitoring:
+    external: true

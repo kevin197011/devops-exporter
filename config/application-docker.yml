@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: devops-exporter
+
+# Actuator 配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# 域名监控配置
+domain:
+  monitor:
+    enabled: true
+    check-interval: 3600
+    warning-days: 30
+    domains:
+      - google.com
+      - github.com
+      - stackoverflow.com
+    connection-timeout: 5000
+    read-timeout: 10000
+
+# SSL 证书监控配置
+ssl:
+  monitor:
+    enabled: true
+    check-interval: 3600
+    warning-days: 30
+    domains:
+      - google.com
+      - github.com
+      - stackoverflow.com
+      - baidu.com
+    connection-timeout: 5000
+    read-timeout: 10000
+
+# 日志配置
+logging:
+  level:
+    io.github.devops.exporter: INFO
+    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /app/logs/devops-exporter.log
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
