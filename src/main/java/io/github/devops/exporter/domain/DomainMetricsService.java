@@ -1,6 +1,5 @@
-package io.github.devops.exporter.metrics;
+package io.github.devops.exporter.domain;
 
-import io.github.devops.exporter.domain.DomainInfo;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;

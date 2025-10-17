@@ -1,9 +1,6 @@
-package io.github.devops.exporter.scheduler;
+package io.github.devops.exporter.domain;
 
 import io.github.devops.exporter.config.DomainMonitorProperties;
-import io.github.devops.exporter.domain.DomainCheckService;
-import io.github.devops.exporter.domain.DomainInfo;
-import io.github.devops.exporter.metrics.DomainMetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -79,6 +76,7 @@ public class DomainMonitorScheduler {
                         DomainInfo errorInfo = new DomainInfo(domain);
                         errorInfo.setStatus("ERROR");
                         errorInfo.setError(throwable.getMessage());
+                        errorInfo.setDaysUntilExpiration(-999);
                         metricsService.updateDomainMetrics(errorInfo);
                         
                         return null;
@@ -100,14 +98,14 @@ public class DomainMonitorScheduler {
         String status = domainInfo.getStatus();
         
         if ("ERROR".equals(status)) {
-            logger.error("Domain {} check failed: {}", domain, domainInfo.getError());
+            logger.error("Domain {} WHOIS check failed: {}", domain, domainInfo.getError());
         } else if ("EXPIRED".equals(status)) {
-            logger.warn("Domain {} SSL certificate has EXPIRED!", domain);
+            logger.warn("Domain {} registration has EXPIRED!", domain);
         } else if ("WARNING".equals(status)) {
-            logger.warn("Domain {} SSL certificate expires in {} days", 
+            logger.warn("Domain {} registration expires in {} days", 
                 domain, domainInfo.getDaysUntilExpiration());
         } else {
-            logger.info("Domain {} SSL certificate is valid, expires in {} days", 
+            logger.info("Domain {} registration is valid, expires in {} days", 
                 domain, domainInfo.getDaysUntilExpiration());
         }
     }

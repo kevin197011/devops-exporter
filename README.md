@@ -101,31 +101,72 @@ http://localhost:8080/actuator/prometheus
 
 ## API 端点
 
-### 监控相关
+### 域名 WHOIS 监控
+- `POST /api/domain/check` - 触发域名 WHOIS 检查
 - `GET /api/domain/status` - 获取所有域名状态
 - `GET /api/domain/status/{domain}` - 获取指定域名状态
-- `POST /api/domain/check` - 手动触发域名检查
+
+### SSL 证书监控
+- `POST /api/ssl/check` - 触发 SSL 证书检查
+- `GET /api/ssl/status` - 获取所有 SSL 证书状态
+- `GET /api/ssl/status/{domain}` - 获取指定域名 SSL 证书状态
+
+### 端口连通性监控
+- `POST /api/port/check` - 触发端口连通性检查
+- `GET /api/port/status` - 获取所有端口状态
+- `GET /api/port/status/{target}` - 获取指定端口状态（注意：URL中的冒号需要编码为%3A）
+
+### HTTP 服务监控
+- `POST /api/http/check` - 触发 HTTP 服务可用性检查
+- `GET /api/http/status` - 获取所有 HTTP 服务状态
+- `GET /api/http/status/{urlHash}` - 获取指定 URL 的状态（使用 URL 的 hashCode）
+
+### 统一监控管理
+- `POST /api/monitor/check/all` - 触发所有类型的检查
+- `GET /api/monitor/status/summary` - 获取监控状态汇总
+- `GET /api/monitor/health` - 获取服务健康状态
 
 ### 系统相关
 - `GET /actuator/prometheus` - Prometheus 指标
 - `GET /actuator/metrics` - 应用指标
+- `GET /actuator/health` - Spring Boot 健康检查
 
 ## 项目结构
 
 ```
 src/main/java/io/github/devops/exporter/
 ├── config/                    # 配置相关
-│   └── DomainMonitorProperties.java
-├── controller/                # REST API 控制器
-│   └── DomainMonitorController.java
-├── domain/                    # 域名监控核心逻辑
+│   ├── DomainMonitorProperties.java    # 域名WHOIS监控配置
+│   ├── SslMonitorProperties.java       # SSL证书监控配置
+│   ├── PortMonitorProperties.java      # 端口监控配置
+│   └── HttpMonitorProperties.java      # HTTP监控配置
+├── controller/                # 统一控制器
+│   └── MonitorController.java          # 统一监控管理API
+├── domain/                    # 域名WHOIS监控模块
 │   ├── DomainInfo.java
-│   └── DomainCheckService.java
+│   ├── DomainCheckService.java
+│   ├── DomainMetricsService.java
+│   ├── DomainMonitorScheduler.java
+│   └── DomainController.java
+├── ssl/                       # SSL证书监控模块
+│   ├── SslCertificateInfo.java
+│   ├── SslCheckService.java
+│   ├── SslMetricsService.java
+│   ├── SslMonitorScheduler.java
+│   └── SslController.java
+├── port/                      # 端口监控模块
+│   ├── PortInfo.java
+│   ├── PortCheckService.java
+│   ├── PortMetricsService.java
+│   ├── PortMonitorScheduler.java
+│   └── PortController.java
+├── http/                      # HTTP监控模块
+│   ├── HttpInfo.java
+│   ├── HttpCheckService.java
+│   ├── HttpMetricsService.java
+│   ├── HttpMonitorScheduler.java
+│   └── HttpController.java
 
-├── metrics/                   # Prometheus 指标
-│   └── DomainMetricsService.java
-├── scheduler/                 # 定时任务
-│   └── DomainMonitorScheduler.java
 └── DevopsExporterApplication.java
 ```
 
