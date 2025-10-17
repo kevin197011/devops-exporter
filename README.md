@@ -4,12 +4,12 @@
 
 ## 功能特性
 
-- 🔍 **双重监控**: 同时监控域名 WHOIS 注册过期时间和 SSL 证书过期时间
+- 🔍 **四重监控**: 同时监控域名 WHOIS 注册过期时间、SSL 证书过期时间、端口连通性和 HTTP 服务可用性
 - 📊 **Prometheus 集成**: 导出标准的 Prometheus 指标
 - ⚙️ **配置驱动**: 通过 YAML 文件灵活配置监控参数
-- 🏗️ **模块化设计**: 清晰的模块结构，域名和SSL监控完全分离
-- 🚀 **异步处理**: 并发检查多个域名和证书，提高效率
-- 🎯 **独立配置**: 域名和SSL监控可以独立启用/禁用
+- 🏗️ **模块化设计**: 清晰的模块结构，域名、SSL、端口和HTTP监控完全分离
+- 🚀 **异步处理**: 并发检查多个域名、证书、端口和HTTP服务，提高效率
+- 🎯 **独立配置**: 域名、SSL、端口和HTTP监控可以独立启用/禁用
 - 🔧 **REST API**: 提供手动触发和状态查询接口
 
 ## 快速开始
@@ -43,6 +43,37 @@ ssl:
       - api.example.com
     connection-timeout: 5000
     read-timeout: 10000
+
+# 端口连通性监控
+port:
+  monitor:
+    enabled: true
+    check-interval: 300   # 检查间隔（秒）
+    ports:
+      - 1.1.1.1:80       # IP:端口格式
+      - 8.8.8.8:53
+      - example.com:443   # 域名:端口格式
+      - your-api.com:8080
+    connection-timeout: 5000
+
+# HTTP 服务可用性监控
+http:
+  monitor:
+    enabled: true
+    check-interval: 300   # 检查间隔（秒）
+    urls:
+      - https://baidu.com
+      - http://1.1.1.1:8998
+      - https://your-api.com/health
+      - http://localhost:8080/actuator/health
+    connection-timeout: 10000
+    read-timeout: 15000
+    expected-status-codes:
+      - 200
+      - 201
+      - 202
+      - 204
+    follow-redirects: true
 ```
 
 ### 2. 运行应用

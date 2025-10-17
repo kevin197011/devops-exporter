@@ -54,6 +54,48 @@ ssl:
     # 读取超时（毫秒）
     read-timeout: 10000
 
+# 端口监控配置
+port:
+  monitor:
+    enabled: true
+    # 检查间隔（秒）
+    check-interval: 300
+    # 监控的端口列表 (格式: ip:port)
+    ports:
+      - 1.1.1.1:80
+      - 8.8.8.8:53
+      - google.com:443
+      - github.com:22
+      - localhost:8080
+    # 连接超时（毫秒）
+    connection-timeout: 5000
+
+# HTTP 可用性监控配置
+http:
+  monitor:
+    enabled: true
+    # 检查间隔（秒）
+    check-interval: 300
+    # 监控的URL列表
+    urls:
+      - https://baidu.com
+      - http://1.1.1.1:8998
+      - https://google.com
+      - https://github.com
+      - http://localhost:8080/actuator/health
+    # 连接超时（毫秒）
+    connection-timeout: 10000
+    # 读取超时（毫秒）
+    read-timeout: 15000
+    # 期望的HTTP状态码（可选，默认200-299为成功）
+    expected-status-codes:
+      - 200
+      - 201
+      - 202
+      - 204
+    # 是否跟随重定向
+    follow-redirects: true
+
 # 日志配置
 logging:
   level:

@@ -45,6 +45,36 @@ ssl:
     connection-timeout: 5000
     read-timeout: 10000
 
+# 端口监控配置
+port:
+  monitor:
+    enabled: true
+    check-interval: 300
+    ports:
+      - 1.1.1.1:80
+      - 8.8.8.8:53
+      - google.com:443
+      - github.com:22
+    connection-timeout: 5000
+
+# HTTP 可用性监控配置
+http:
+  monitor:
+    enabled: true
+    check-interval: 300
+    urls:
+      - https://baidu.com
+      - https://google.com
+      - https://github.com
+    connection-timeout: 10000
+    read-timeout: 15000
+    expected-status-codes:
+      - 200
+      - 201
+      - 202
+      - 204
+    follow-redirects: true
+
 # 日志配置
 logging:
   level:

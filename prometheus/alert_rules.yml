@@ -69,6 +69,87 @@ groups:
           summary: "SSL 证书 {{ $labels.domain }} 查询失败"
           description: "无法获取域名 {{ $labels.domain }} 的 SSL 证书信息，请检查域名是否可访问"
 
+  - name: port_connectivity_alerts
+    rules:
+      # 端口不可达告警
+      - alert: PortDown
+        expr: port_open == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: port-monitor
+        annotations:
+          summary: "端口 {{ $labels.target }} 不可达"
+          description: "端口 {{ $labels.target }} ({{ $labels.host }}:{{ $labels.port }}) 已关闭或不可达超过 2 分钟"
+
+      # 端口响应时间过长告警
+      - alert: PortHighResponseTime
+        expr: port_response_time_ms > 5000
+        for: 5m
+        labels:
+          severity: warning
+          service: port-monitor
+        annotations:
+          summary: "端口 {{ $labels.target }} 响应时间过长"
+          description: "端口 {{ $labels.target }} 的响应时间为 {{ $value }}ms，超过 5 秒阈值"
+
+      # 端口检查错误告警
+      - alert: PortCheckError
+        expr: port_status == -1
+        for: 3m
+        labels:
+          severity: warning
+          service: port-monitor
+        annotations:
+          summary: "端口 {{ $labels.target }} 检查失败"
+          description: "无法检查端口 {{ $labels.target }} 的连通性，请检查配置或网络连接"
+
+  - name: http_availability_alerts
+    rules:
+      # HTTP 服务不可用告警
+      - alert: HttpServiceDown
+        expr: http_available == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: http-monitor
+        annotations:
+          summary: "HTTP 服务 {{ $labels.url }} 不可用"
+          description: "HTTP 服务 {{ $labels.url }} ({{ $labels.host }}) 已不可用超过 2 分钟，状态码: {{ $labels.status_code }}"
+
+      # HTTP 响应时间过长告警
+      - alert: HttpHighResponseTime
+        expr: http_response_time_ms > 10000
+        for: 5m
+        labels:
+          severity: warning
+          service: http-monitor
+        annotations:
+          summary: "HTTP 服务 {{ $labels.url }} 响应时间过长"
+          description: "HTTP 服务 {{ $labels.url }} 的响应时间为 {{ $value }}ms，超过 10 秒阈值"
+
+      # HTTP 状态码异常告警
+      - alert: HttpBadStatusCode
+        expr: http_status_code >= 400 and http_status_code < 600
+        for: 3m
+        labels:
+          severity: warning
+          service: http-monitor
+        annotations:
+          summary: "HTTP 服务 {{ $labels.url }} 返回异常状态码"
+          description: "HTTP 服务 {{ $labels.url }} 返回状态码 {{ $value }}，持续超过 3 分钟"
+
+      # HTTP 服务检查错误告警
+      - alert: HttpCheckError
+        expr: http_status == -1
+        for: 3m
+        labels:
+          severity: warning
+          service: http-monitor
+        annotations:
+          summary: "HTTP 服务 {{ $labels.url }} 检查失败"
+          description: "无法检查 HTTP 服务 {{ $labels.url }} 的可用性，请检查配置或网络连接"
+
   - name: service_health_alerts
     rules:
       # 服务健康检查告警

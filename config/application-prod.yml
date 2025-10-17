@@ -49,6 +49,41 @@ ssl:
     connection-timeout: 10000
     read-timeout: 15000
 
+# 端口监控配置 - 生产环境
+port:
+  monitor:
+    enabled: true
+    check-interval: 300  # 5分钟检查一次
+    ports:
+      # 在这里配置你的生产服务端口
+      - your-server.com:80
+      - your-server.com:443
+      - your-api.com:8080
+      - your-db.com:3306
+      - your-redis.com:6379
+      - 1.1.1.1:53
+    connection-timeout: 10000
+
+# HTTP 可用性监控配置 - 生产环境
+http:
+  monitor:
+    enabled: true
+    check-interval: 300  # 5分钟检查一次
+    urls:
+      # 在这里配置你的生产服务URL
+      - https://your-domain.com
+      - https://api.your-domain.com/health
+      - https://www.your-domain.com
+      - https://admin.your-domain.com/status
+    connection-timeout: 10000
+    read-timeout: 15000
+    expected-status-codes:
+      - 200
+      - 201
+      - 202
+      - 204
+    follow-redirects: true
+
 # 日志配置 - 生产环境
 logging:
   level:
